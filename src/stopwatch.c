@@ -23,7 +23,7 @@ typedef struct {
     uint16_t hours;
 } stopwatch;
  
-void stopwatch (stopwatch_context * current_stopwatch_context, stopwatch * current_stopwatch) {
+void stopwatch_function (stopwatch_context * current_stopwatch_context, stopwatch * current_stopwatch) {
     current_stopwatch_context -> current_time = get_time();
     //if current_nsec < start_nsec, the ans might be in negative, so we borrow a sec
     if (current_stopwatch_context -> current_time.tv_nsec < current_stopwatch_context -> start_time.tv_nsec){
@@ -43,6 +43,13 @@ void start_time_for_stopwatch (stopwatch_context * current_stopwatch_context) {
 }
 
 int main (void) {
-   
+   stopwatch_context *now2 = malloc(sizeof(stopwatch_context)); 
+   stopwatch *now = malloc(sizeof(stopwatch));
+   start_time_for_stopwatch(now2);
+   while(true){
+        stopwatch_function (now2, now);
+        printf("\r %d:%d:%d:%d", now ->hours, now -> minutes, now -> seconds, now -> milliseconds);
+        fflush(stdout);
+   }
     return 0;
 }
