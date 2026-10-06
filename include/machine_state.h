@@ -4,6 +4,6 @@
 typedef enum {
     RUNNING,
     PAUSED,
-    STOPPED,
-} MACHINE_STATE;
+    STOPPED
+} stopwatch_enum;
 #endif
