@@ -13,7 +13,7 @@ typedef struct {
     struct timespec start_time;
     struct timespec current_time;
     stopwatch_enum machine_state;
-    uint16_t accumulated_time_seconds;  
+    struct timespec accumulated_time;  
 } stopwatch_context;
 
 typedef struct {
@@ -24,14 +24,21 @@ typedef struct {
 } stopwatch;
  
 void stopwatch_function (stopwatch_context * current_stopwatch_context, stopwatch * current_stopwatch) {
+    uint16_t total_elasped_secs = 0;
+    uint32_t total_elasped_nsecs = 0;
     current_stopwatch_context -> current_time = get_time();
     //if current_nsec < start_nsec, the ans might be in negative, so we borrow a sec
     if (current_stopwatch_context -> current_time.tv_nsec < current_stopwatch_context -> start_time.tv_nsec){
        current_stopwatch_context -> current_time.tv_nsec += 1000000000;
        current_stopwatch_context -> current_time.tv_sec -=1;
     }
-    current_stopwatch -> milliseconds = (current_stopwatch_context -> current_time.tv_nsec - current_stopwatch_context -> start_time.tv_nsec) / 1000000; //1M ns = 1 ms
-    uint16_t total_elasped_secs = (current_stopwatch_context -> current_time.tv_sec - current_stopwatch_context -> start_time.tv_sec) + current_stopwatch_context -> accumulated_time_seconds;
+    total_elasped_nsecs = current_stopwatch_context -> accumulated_time.tv_nsec + (current_stopwatch_context -> current_time.tv_nsec - current_stopwatch_context -> start_time.tv_nsec);
+    if (total_elasped_nsecs >= 1000000000) {
+       total_elasped_secs += total_elasped_nsecs / 1000000000;
+       total_elasped_nsecs = total_elasped_nsecs % 1000000000; 
+    }
+    current_stopwatch -> milliseconds = total_elasped_nsecs / 1000000; //1M ns = 1 ms
+    total_elasped_secs += (current_stopwatch_context -> current_time.tv_sec - current_stopwatch_context -> start_time.tv_sec) + current_stopwatch_context -> accumulated_time.tv_sec;
     current_stopwatch -> seconds = total_elasped_secs % 60;
 
     current_stopwatch -> minutes = (total_elasped_secs / 60) % 60; // first div converts it to mins and modulo resets it zero every time factor of 60 is hit else remainder min is returned
@@ -44,6 +51,8 @@ void start_time_for_stopwatch (stopwatch_context * current_stopwatch_context) {
 
 int main (void) {
    stopwatch_context *now2 = malloc(sizeof(stopwatch_context)); 
+   now2 -> accumulated_time.tv_nsec = 0;
+   now2 -> accumulated_time.tv_sec = 0;
    stopwatch *now = malloc(sizeof(stopwatch));
    start_time_for_stopwatch(now2);
    while(true){
