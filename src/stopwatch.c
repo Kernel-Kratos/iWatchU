@@ -49,6 +49,21 @@ void start_time_for_stopwatch (stopwatch_context * current_stopwatch_context) {
     current_stopwatch_context ->start_time = get_time();
 }
 
+void pause_stopwatch (stopwatch_context *current_stopwatch_context) {
+    current_stopwatch_context -> current_time = get_time();
+    //if current_nsec < start_nsec, the ans might be in negative, so we borrow a sec
+    if (current_stopwatch_context -> current_time.tv_nsec < current_stopwatch_context -> start_time.tv_nsec){
+       current_stopwatch_context -> current_time.tv_nsec += 1000000000;
+       current_stopwatch_context -> current_time.tv_sec -=1;
+    }
+    current_stopwatch_context -> accumulated_time.tv_nsec += current_stopwatch_context -> current_time.tv_nsec - current_stopwatch_context -> start_time.tv_nsec; 
+    if (current_stopwatch_context -> accumulated_time.tv_nsec > 1000000000) {
+        current_stopwatch_context -> accumulated_time.tv_sec += current_stopwatch_context -> accumulated_time.tv_nsec / 1000000000;
+        current_stopwatch_context -> accumulated_time.tv_nsec = current_stopwatch_context -> accumulated_time.tv_nsec % 1000000000;
+    }
+    current_stopwatch_context -> accumulated_time.tv_sec  += (current_stopwatch_context -> current_time.tv_sec - current_stopwatch_context -> start_time.tv_sec);
+}
+
 int main (void) {
    stopwatch_context *now2 = malloc(sizeof(stopwatch_context)); 
    now2 -> accumulated_time.tv_nsec = 0;
