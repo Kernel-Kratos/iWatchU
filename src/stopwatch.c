@@ -4,24 +4,13 @@
 #include <stdint.h>
 #include "machine_state.h"
 #include "get_time.h"
+#include "stopwatch.h"
 
 #define hour 24
 #define minute_hour 59
 #define second_minute 59
 
-typedef struct {
-    struct timespec start_time;
-    struct timespec current_time;
-    stopwatch_enum machine_state;
-    struct timespec accumulated_time;  
-} stopwatch_context;
 
-typedef struct {
-    uint16_t milliseconds;
-    uint16_t seconds;
-    uint16_t minutes;
-    uint16_t hours;
-} stopwatch;
  
 void stopwatch_function (stopwatch_context * current_stopwatch_context, stopwatch * current_stopwatch) {
     uint16_t total_elasped_secs = 0;
@@ -62,18 +51,4 @@ void pause_stopwatch (stopwatch_context *current_stopwatch_context) {
         current_stopwatch_context -> accumulated_time.tv_nsec = current_stopwatch_context -> accumulated_time.tv_nsec % 1000000000;
     }
     current_stopwatch_context -> accumulated_time.tv_sec  += (current_stopwatch_context -> current_time.tv_sec - current_stopwatch_context -> start_time.tv_sec);
-}
-
-int main (void) {
-   stopwatch_context *now2 = malloc(sizeof(stopwatch_context)); 
-   now2 -> accumulated_time.tv_nsec = 0;
-   now2 -> accumulated_time.tv_sec = 0;
-   stopwatch *now = malloc(sizeof(stopwatch));
-   start_time_for_stopwatch(now2);
-   while(true){
-        stopwatch_function (now2, now);
-        printf("\r %d:%d:%d:%d", now ->hours, now -> minutes, now -> seconds, now -> milliseconds);
-        fflush(stdout);
-   }
-    return 0;
 }
