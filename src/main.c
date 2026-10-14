@@ -6,17 +6,37 @@
 #include "stopwatch.h"
 
 int main (void) {
-
     stopwatch_context *now2 = malloc(sizeof(stopwatch_context)); 
     now2 -> accumulated_time.tv_nsec = 0;
     now2 -> accumulated_time.tv_sec = 0;
     stopwatch *stopwatch_frontend = malloc(sizeof(stopwatch));
     start_time_for_stopwatch(now2);
-    SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
-    //SetConfigFlags(FLAG_WINDOW_UNDECORATED);
-    InitWindow(80, 50, "iWatchU");
+    SetConfigFlags (FLAG_WINDOW_TRANSPARENT);
+    SetConfigFlags (FLAG_WINDOW_UNDECORATED);
+    SetConfigFlags (FLAG_WINDOW_TOPMOST);
+    int screen_width = 80;
+    int screen_height = 50;
+    InitWindow(screen_width, screen_height, "iWatchU");
+    Vector2 dragOffset = {0.0f, 0.0f};
+    bool isDragging = false;
     SetTargetFPS(30);
     while (!WindowShouldClose()) {
+        Vector2 mousePos = GetMousePosition();
+        Vector2 windowPos = GetWindowPosition();
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            isDragging = true;
+            dragOffset = mousePos;
+        }
+        if (isDragging) {
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+                int newWinX = (int) (windowPos.x + mousePos.x - dragOffset.x);
+                int newWinY = (int) (windowPos.y + mousePos.y - dragOffset.y);
+                SetWindowPosition (newWinX, newWinY);
+            }
+            else {
+                isDragging = false;
+            }
+        }
         stopwatch_function(now2, stopwatch_frontend);
         char time_text[64];
         snprintf(time_text, sizeof(time_text), "%02d:%02d:%02d", stopwatch_frontend -> hours, stopwatch_frontend -> minutes, stopwatch_frontend -> seconds);
