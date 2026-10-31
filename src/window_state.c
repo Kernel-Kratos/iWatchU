@@ -33,7 +33,26 @@
             pclose(fp);
         }
         return false;       
-    } 
+    }
+    bool is_window_open (char *target_application) {
+    char command [128];
+    snprintf(command, sizeof(command), "pgrep %s", target_application);
+
+    FILE *fp = popen(command, "r");
+    if (fp == NULL) {
+        perror("popopen failed");
+        return false;
+    }
+
+    char buffer[32];
+    bool is_running = false;
+
+    if (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        is_running = true;
+    }
+    pclose(fp);
+    return is_running;
+} 
 #elif defined(_WIN32) || defined(_WIN64)
     //TO-DO
 #endif
