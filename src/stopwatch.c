@@ -6,10 +6,6 @@
 #include "get_time.h"
 #include "stopwatch.h"
 
-#define hour 24
-#define minute_hour 59
-#define second_minute 59
-
 
  
 void stopwatch_function (stopwatch_context * current_stopwatch_context, stopwatch * current_stopwatch) {
